@@ -557,6 +557,11 @@ document.addEventListener('DOMContentLoaded', async function() {
     const results = await Promise.all(
       dates.map(async (date) => {
         try {
+          // ซ่อนข้อมูลวันที่ 10-25
+          const day = new Date(date).getDate();
+          if (day >= 10 && day <= 25) {
+            return { date, dayCost: 0, nightCost: 0 };
+          }
           const res = await fetch(`${API_BASE}/solar-size?date=${date}`);
           const json = await res.json();
           return { date, dayCost: json.dayCost ?? 0, nightCost: json.nightCost ?? 0 };
@@ -1686,10 +1691,18 @@ initializeChart();
           const bill = (props.bill !== null && props.bill !== undefined) ? Number(props.bill).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + ' ฿' : '';
           const energy = (props.energy !== null && props.energy !== undefined) ? Number(props.energy).toFixed(2) + ' Unit' : '';
 
+          // ตรวจว่าเป็นวันล่าสุด (วันนี้) หรือไม่ → ใช้สีขาว
+          const eventDate = arg.event.start ? arg.event.start.toISOString().slice(0,10) : '';
+          const todayStr = new Date().toISOString().slice(0,10);
+          const isToday = eventDate === todayStr;
+          const titleColor = isToday ? '#fff' : '#2c1810';
+          const billColor = isToday ? '#fff' : '#5a2b00';
+          const energyColor = isToday ? '#eee' : '#333';
+
           // Title may still be used for the event header; we display bill first then energy
-          const titleHtml = arg.event.title ? `<div style="font-size:11px; font-weight:700; color:#2c1810;">${arg.event.title}</div>` : '';
-          const billHtml = bill ? `<div style="font-size:12px; font-weight:800; color:#5a2b00; margin-top:4px;">${bill}</div>` : '';
-          const energyHtml = energy ? `<div style="font-size:11px; color:#333;">${energy}</div>` : '';
+          const titleHtml = arg.event.title ? `<div style="font-size:11px; font-weight:700; color:${titleColor};">${arg.event.title}</div>` : '';
+          const billHtml = bill ? `<div style="font-size:12px; font-weight:800; color:${billColor}; margin-top:4px;">${bill}</div>` : '';
+          const energyHtml = energy ? `<div style="font-size:11px; color:${energyColor};">${energy}</div>` : '';
 
           return { html: `${titleHtml}${billHtml}${energyHtml}` };
         } catch (e) {
@@ -1702,7 +1715,13 @@ initializeChart();
         const month = fetchInfo.start.getMonth() + 1;
 
         const events = await fetchEvents(year, month);
-        successCallback(events);
+        // ซ่อนข้อมูลวันที่ 10-25
+        const filtered = events.filter(e => {
+          const d = new Date(e.start);
+          const day = d.getDate();
+          return day < 10 || day > 25;
+        });
+        successCallback(filtered);
       },
 
       dateClick: async function(info) {
@@ -2659,9 +2678,9 @@ async function markAllAsRead() {
 // อัปเดต badge และสั่น bell icon
 function updateBadge(count) {
   if (!bellBadge || !bellIcon) return;
-  // Update badge text and visibility
-  bellBadge.textContent = count > 0 ? String(count) : '';
-  bellBadge.style.display = count > 0 ? 'inline-block' : 'none';
+  // Badge number hidden per user request
+  bellBadge.textContent = '';
+  bellBadge.style.display = 'none';
   
   // ถ้ามี notification ใหม่ ให้สั่น bell icon
   if (count > 0) shakeBellIcon();
@@ -2780,9 +2799,9 @@ function shakeKwangIcon() {
 // อัปเดตฟังก์ชัน updateBadge เพื่อสั่น icon ตาม type
 function updateBadgeWithShake(count, latestType) {
   if (!bellBadge || !bellIcon) return;
-  // Update badge text and visibility
-  bellBadge.textContent = count > 0 ? String(count) : '';
-  bellBadge.style.display = count > 0 ? 'inline-block' : 'none';
+  // Badge number hidden per user request
+  bellBadge.textContent = '';
+  bellBadge.style.display = 'none';
 
   if (count > 0) {
     shakeBellIcon();

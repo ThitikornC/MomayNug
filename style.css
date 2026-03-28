@@ -1943,6 +1943,10 @@ font-size: 14px;
   background: #fef3c7 ;
 }
 
+.fc .fc-day-today .fc-daygrid-day-number {
+  color: #fff;
+}
+
 /* ===== Column Header ===== */
 .fc .fc-col-header-cell-cushion {
   font-size: 10px;
