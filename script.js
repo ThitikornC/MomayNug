@@ -1715,11 +1715,13 @@ initializeChart();
         const month = fetchInfo.start.getMonth() + 1;
 
         const events = await fetchEvents(year, month);
-        // ซ่อนข้อมูลวันที่ 10-25
+        // ซ่อนข้อมูลก่อนวันนี้
+        const today = new Date();
+        today.setHours(0, 0, 0, 0);
         const filtered = events.filter(e => {
           const d = new Date(e.start);
-          const day = d.getDate();
-          return day < 10 || day > 25;
+          d.setHours(0, 0, 0, 0);
+          return d >= today;
         });
         successCallback(filtered);
       },
