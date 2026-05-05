@@ -1677,11 +1677,16 @@ initializeChart();
 
     await preloadInitialMonths();
 
+    const todayForRange = new Date();
+    const tomorrowForRange = new Date(todayForRange);
+    tomorrowForRange.setDate(tomorrowForRange.getDate() + 1);
+
     calendar = new FullCalendar.Calendar(calendarEl, {
       initialView: "dayGridMonth",
       locale: "en",
       height: 'auto',
       headerToolbar: { left: "prev", center: "title", right: "next" },
+      validRange: { start: '2026-04-20', end: tomorrowForRange.toISOString().slice(0, 10) },
 
       // Custom content for events: always show bill on top and unit below
       eventOrder: 'extendedProps._order',
@@ -1715,13 +1720,15 @@ initializeChart();
         const month = fetchInfo.start.getMonth() + 1;
 
         const events = await fetchEvents(year, month);
-        // ซ่อนข้อมูลก่อนวันนี้
+        // แสดงข้อมูลตั้งแต่ 20-04-2026 จนถึงวันปัจจุบัน
+        const startLimit = new Date(2026, 3, 20); // April 20, 2026
+        startLimit.setHours(0, 0, 0, 0);
         const today = new Date();
         today.setHours(0, 0, 0, 0);
         const filtered = events.filter(e => {
           const d = new Date(e.start);
           d.setHours(0, 0, 0, 0);
-          return d >= today;
+          return d >= startLimit && d <= today;
         });
         successCallback(filtered);
       },
