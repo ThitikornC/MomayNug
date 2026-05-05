@@ -1787,6 +1787,7 @@ initializeChart();
     // Bind click on both the div and img for maximum compatibility
     const openCalendar = () => {
       popup.classList.add("active");
+      calendar?.gotoDate(new Date());
       calendar?.updateSize();
     };
     if (calendarIcon) calendarIcon.addEventListener("click", openCalendar);
